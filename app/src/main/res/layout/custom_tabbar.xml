@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/tabbar_hegit"
+        android:orientation="horizontal"
+        android:weightSum="4"
+        android:background="@color/colorPrimary">
+
+        <Button
+            android:id="@+id/btn_today"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/Today"
+            android:inputType="text"
+            android:background="@color/colorPrimaryDark"
+            android:textColor="@color/white"
+            android:textSize="@dimen/txt_16sp"
+            android:layout_weight="1"/>
+
+
+        <Button
+            android:id="@+id/btn_tomorrow"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/Tomorrow"
+            android:inputType="text"
+            android:background="@color/transparent"
+            android:textColor="@color/grey"
+            android:textSize="@dimen/txt_16sp"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/btn_thisweek"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/This_Week"
+            android:inputType="text"
+            android:background="@color/transparent"
+            android:textColor="@color/grey"
+            android:textSize="@dimen/txt_16sp"
+            android:layout_weight="1"/>
+
+
+        <Button
+            android:id="@+id/btn_bydate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/By_Date"
+            android:inputType="text"
+            android:background="@color/transparent"
+            android:textColor="@color/grey"
+            android:textSize="@dimen/txt_16sp"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+</LinearLayout>

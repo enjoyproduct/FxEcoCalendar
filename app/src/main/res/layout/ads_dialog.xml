@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/transparent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/dlg_header"
+            android:padding="@dimen/dimen_8dp">
+            <TextView
+                android:id="@+id/tv_dlg_descrption"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/Turn_on_ads"
+                android:textColor="@color/white"
+                android:textSize="@dimen/txt_22sp"
+                android:layout_toLeftOf="@+id/sw_dlg"
+                />
+            <Switch
+                android:id="@+id/sw_dlg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:track="@drawable/switch_track_selector"
+                android:thumb="@drawable/switch_thumb_selector"/>
+        </RelativeLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/white">
+
+            <com.fxecocal.free.widget.MyCircularImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/image"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/dimen_8dp"/>
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dimen_8dp"
+                android:text="Description"/>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/dlg_footer"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/btn_dlg_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/Cancel"
+                android:textColor="@color/white"
+                android:background="@color/transparent"
+                />
+            <Button
+                android:id="@+id/btn_dlg_set"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/Set"
+                android:textColor="@color/white"
+                android:background="@color/transparent"
+                />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/tabbar_hegit"
+        android:background="@color/colorPrimaryLight">
+
+        <ImageButton
+            android:id="@+id/btn_before"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@drawable/left"
+            android:visibility="gone"
+            />
+        <Button
+            android:id="@+id/btn_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Jun 24, 2016"
+            android:inputType="text"
+            android:background="@color/transparent"
+            android:textColor="@color/white"
+            android:textSize="@dimen/txt_14sp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            />
+
+        <ImageButton
+            android:id="@+id/btn_next"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@drawable/right"
+            android:layout_alignParentRight="true"
+            android:visibility="gone"
+            />
+
+
+
+    </RelativeLayout>
+</LinearLayout>

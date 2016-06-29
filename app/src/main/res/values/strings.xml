@@ -1,0 +1,93 @@
+<resources>
+    <string name="app_name">Forex and Economic Calendar</string>
+    <string name="action_settings">Settings</string>
+
+
+    <!--google project id === thivorien@gmail.com-->
+    <string name="project_id">535417836265</string>
+    <string name="google_android_key">AIzaSyAnKdnRaagQEAC3lBq5DdsKIFkgE-R1Fus</string>
+    <string name="server_key">AIzaSyDSAX_JhBN9By9EdR-rqWVgn1WTsSRF8sA</string>
+    <string name="title_activity_exception_view">ExceptionViewActivity</string>
+
+    <string name="interstitial_ad_unit_id">ca-app-pub-4785401331977158/1124061024</string>
+
+    <string name="Today">Today</string>
+    <string name="Tomorrow">Tomorrow</string>
+    <string name="This_Week">This Week</string>
+    <string name="By_Date">By Date</string>
+    <string name="Setting">Settings</string>
+    <string name="Invite_Friends">Invite Friends</string>
+    <string name="Send_Feedback">Send Feedback</string>
+    <string name="Rate_Us">Rate Us</string>
+    <string name="More">More</string>
+    <string name="Notificatoin">Notificatoin</string>
+    <string name="Symbols">Symbols</string>
+    <string name="Impact">Impact</string>
+    <string name="Local_Time">Local Time</string>
+    <string name="Language">Language</string>
+    <string name="Cancel">Cancel</string>
+    <string name="Set">Set</string>
+    <string name="My_Fx">My Fx</string>
+    <string name="OK">OK</string>
+    <string name="Turn_on_ads">On/Off Ads</string>
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <!--<string name=""></string>-->
+    <string name="English">English</string>
+    <string name="Chinese">Chinese</string>
+    <string name="Japanese">Japanese</string>
+
+    <string-array name="notification_times">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+
+    </string-array>
+    <string-array name="symbols">
+        <item>AUD</item>
+        <item>CAD</item>
+        <item>CHF</item>
+        <item>CNY</item>
+        <item>EUR</item>
+        <item>GBP</item>
+        <item>JPY</item>
+        <item>NZD</item>
+        <item>USD</item>
+    </string-array>
+    <string-array name="impacts">
+        <item>No Impact</item>
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+
+    </string-array>
+    <string-array name="languages">
+        <item>English</item>
+        <item>Chinese</item>
+        <item>Japanese</item>
+
+    </string-array>
+    <string name="title_activity_ads">AdsActivity</string>
+</resources>
