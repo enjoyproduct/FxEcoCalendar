@@ -1,7 +1,7 @@
 package com.fxecocal.free.model;
 
 /**
- * Created by dell17 on 6/23/2016.
+ * Created by dell17 on menu6/23/2016.
  */
 public class FactModel {
     String description;
@@ -31,6 +31,16 @@ public class FactModel {
     String forcast;
     String impact;
     long remaining_timestamp;
+
+    public long getReleaseTime() {
+        return releaseTime;
+    }
+
+    public void setReleaseTime(long releaseTime) {
+        this.releaseTime = releaseTime;
+    }
+
+    long releaseTime;
 
     public long getRemaining_timestamp() {
         return remaining_timestamp;
@@ -97,4 +107,13 @@ public class FactModel {
     }
 
     String previous;
+    boolean enabledAlarm;
+
+    public boolean isEnabledAlarm() {
+        return enabledAlarm;
+    }
+
+    public void setEnabledAlarm(boolean enabledAlarm) {
+        this.enabledAlarm = enabledAlarm;
+    }
 }

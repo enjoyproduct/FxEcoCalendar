@@ -19,10 +19,11 @@
             />
         <ImageView
             android:id="@+id/iv_flag"
-            android:layout_width="32dp"
-            android:layout_height="22dp"
+            android:layout_width="42dp"
+            android:layout_height="32dp"
             android:background="@drawable/usd"
             android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:visibility="gone"/>
     </RelativeLayout>
 </LinearLayout>

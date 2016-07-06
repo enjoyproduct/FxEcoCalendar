@@ -38,6 +38,11 @@
                     android:text=""
                     android:textSize="@dimen/txt_14sp"
                     />
+                <ImageView
+                    android:id="@+id/iv_green_check"
+                    android:layout_width="@dimen/dimen_32dp"
+                    android:layout_height="@dimen/dimen_32dp"
+                    android:background="@drawable/green_check"/>
             </LinearLayout>
             <LinearLayout
                 android:id="@+id/ll_if_2"
@@ -55,14 +60,15 @@
                         android:text="Description"
                         android:textColor="@color/black"
                         android:textSize="@dimen/txt_18sp"
+                        android:singleLine="true"
                         android:textAlignment="center"
                         android:layout_centerVertical="true"
                         android:layout_centerHorizontal="true"
                         android:layout_toLeftOf="@+id/iv_if_alarm"/>
                     <ImageView
                         android:id="@+id/iv_if_alarm"
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:layout_alignParentRight="true"
                         android:background="@drawable/alarm_off"/>
                 </RelativeLayout>
@@ -88,7 +94,7 @@
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:layout_marginLeft="@dimen/dimen_12dp"
-                        android:layout_marginRight="4dp"
+                        android:layout_marginRight="2dp"
                         android:background="@drawable/eur"/>
                 </RelativeLayout>
             </LinearLayout>

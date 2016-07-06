@@ -10,13 +10,18 @@
         <com.fxecocal.free.widget.MyCircularImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@drawable/image"
+            android:src="@drawable/ads_dlg_banner"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/dimen_8dp"/>
         <TextView
             android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_margin="@dimen/dimen_8dp"
+            android:background="@color/grey_light"/>
+        <TextView
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dimen_8dp"
-            android:text="Description"/>
+            android:text="@string/loading_description"/>
     </LinearLayout>
 </LinearLayout>

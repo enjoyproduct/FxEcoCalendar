@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -14,43 +15,73 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.error.VolleyError;
+import com.android.volley.request.CustomRequest;
+import com.android.volley.toolbox.Volley;
 import com.fxecocal.free.R;
-import com.fxecocal.free.Utility.ExceptionHandler;
 import com.fxecocal.free.Utility.LocaleHelper;
 import com.fxecocal.free.Utility.Utils;
 import com.fxecocal.free.controller.fragment.MainCalendarFragment;
 import com.fxecocal.free.controller.fragment.MenuFragment;
+import com.fxecocal.free.controller.push.GetNotificationRegID;
+import com.fxecocal.free.model.API;
 import com.fxecocal.free.model.Const;
 import com.fxecocal.free.model.SelectionModel;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.doubleclick.PublisherInterstitialAd;
+import com.tapjoy.TJActionRequest;
+import com.tapjoy.TJConnectListener;
+import com.tapjoy.TJError;
+import com.tapjoy.TJPlacement;
+import com.tapjoy.TJPlacementListener;
+import com.tapjoy.Tapjoy;
+import com.tapjoy.TapjoyConnectFlag;
+import com.tapjoy.TapjoyLog;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TJConnectListener, AdapterView.OnItemSelectedListener {
+
+    String TAG = "MainActivity";
 
     private Toolbar toolbar;
     public static DrawerLayout mDrawerLayout;
@@ -64,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     private TimerTask timerTask;
 
     public String language;
-    public int notificationTime;
+    public int notificationTime, adsPeriod;
     public Set<String> symbols, impacts;
     public boolean localTime, showAds;
 
@@ -76,19 +107,45 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(com.fxecocal.free.R.layout.activity_main);
 
-        ///set exception handler
-        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
-        LocaleHelper.onCreate(this, "en");
+
+        String language = Utils.getFromPreference(this, Const.LANGUAGE_CODE);
+       if (language.length() == 0 ) {
+           language = "en";
+       }
+        LocaleHelper.onCreate(this, language);
+
+        if (Utils.getFromPreference(this, Const.DEVICE_TOKEN).length() == 0) {
+            GetNotificationRegID getNotificationRegID = new GetNotificationRegID(this);
+            getNotificationRegID.registerInBackground();
+        }
+
+        if (Utils.getFromPreference(this, Const.DEVICE_ID).length() == 0) {
+            String deviceID = ((TelephonyManager)getBaseContext().getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+            Utils.saveToPreference(this, Const.DEVICE_ID, deviceID);
+        }
 
         initVariables();
 
         initUI();
-        setShowAds();
+        //////////////////
+        int count = Utils.getIntFromPreference(this, "loadNum");
+        if (count == 0) {
+            setShowAds();
+        } else {
+            count = 1;
+            navigateToMainCalendar();
+            initTimer();
+        }
+        count++;
+        Utils.saveIntToPreference(this, "loadNum", count);
+        /////////////////////////////////////
+//        signin();
+        connectToTapjoy();
     }
     private void initVariables() {
         fragmentManager = getSupportFragmentManager();
         mActivity = this;
-
+        adsPeriod = 60;
         //interstitial ads
         mPublisherInterstitialAd = new PublisherInterstitialAd(this);
         mPublisherInterstitialAd.setAdUnitId(getResources().getString(R.string.interstitial_ad_unit_id));
@@ -105,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
     private void requestNewInterstitial() {
 
         PublisherAdRequest adRequest = new PublisherAdRequest.Builder()
-                .addTestDevice("6A9AC51F285D17A969017B112BA62D0E")
+//                .addTestDevice("6A9AC51F285D17A969017B112BA62D0E")
                 .build();
 
         mPublisherInterstitialAd.loadAd(adRequest);
@@ -157,18 +214,32 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 adsTime ++;
-                if (adsTime == 300) {
+                if (adsTime == adsPeriod) {
+
+                    Random r = new Random();
+                    adsPeriod = r.nextInt(300 - 60) + 60; // 60s ~ 300s
+
                     adsTime = 0;
+
                     mActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             if (mPublisherInterstitialAd.isLoaded()) {
-//                                mPublisherInterstitialAd.show();
+                                if (Utils.getBooleanFromPreference(mActivity, Const.SHOW_ADS)) {
+                                    mPublisherInterstitialAd.show();
+                                }
                             }
-                            MainCalendarFragment.updateCalendar();
+
                         }
                     });
                 }
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MainCalendarFragment.updateCalendar();
+                    }
+                });
+
 
             }
         };
@@ -258,7 +329,7 @@ public class MainActivity extends AppCompatActivity {
                inviteFriends();
                 break;
             case 1:
-               sendFeedback();
+                showFeedbackDlg();
                 break;
             case 2:
                 rateUs();
@@ -293,9 +364,7 @@ public class MainActivity extends AppCompatActivity {
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
         startActivity(Intent.createChooser(sharingIntent, "Share via"));
     }
-    private void sendFeedback() {
 
-    }
     private void rateUs() {
         Uri uri = Uri.parse("market://details?id=" + this.getPackageName());
         Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
@@ -312,8 +381,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     private void more() {
-        startActivity(new Intent(this, AdsActivity.class));
-
+//        startActivity(new Intent(this, AdsActivity.class));
+        callShowOffers();
     }
     Dialog dialog;
     ArrayList<SelectionModel> arrSelectionModel;
@@ -334,8 +403,11 @@ public class MainActivity extends AppCompatActivity {
         final SingleChoiceAdapter singleChoiceAdapter = new SingleChoiceAdapter(arrSelectionModel);
         listView.setAdapter(singleChoiceAdapter);
 
-        TextView textView = (TextView)view.findViewById(R.id.tv_dlg_title);
-        textView.setText(getResources().getString(R.string.Notificatoin));
+        TextView tvTitle = (TextView)view.findViewById(R.id.tv_dlg_title);
+        tvTitle.setText(getResources().getString(R.string.Notificatoin));
+
+        TextView tvDescription = (TextView)view.findViewById(R.id.tv_dlg_descrption);
+        tvDescription.setText(getResources().getString(R.string.notification_select_description));
 
         Button btnSet = (Button)view.findViewById(R.id.btn_dlg_set);
         btnSet.setOnClickListener(new View.OnClickListener() {
@@ -365,6 +437,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
     }
+
     private void setLanguage() {
 
         String[] languages = getResources().getStringArray(R.array.languages);
@@ -386,6 +459,8 @@ public class MainActivity extends AppCompatActivity {
         TextView textView = (TextView)view.findViewById(R.id.tv_dlg_title);
         textView.setText(getResources().getString(R.string.Language));
 
+
+
         Button btnSet = (Button)view.findViewById(R.id.btn_dlg_set);
         btnSet.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -396,13 +471,20 @@ public class MainActivity extends AppCompatActivity {
                         initSettings();
                         if (arrSelectionModel.get(i).getTitle().equals("English")) {
                             LocaleHelper.setLocale(mActivity, "en");
+                            Utils.saveToPreference(mActivity, Const.LANGUAGE_CODE, "en");
+
                         } else if (arrSelectionModel.get(i).getTitle().equals("Chinese")) {
                             LocaleHelper.setLocale(mActivity, "cn");
+                            Utils.saveToPreference(mActivity, Const.LANGUAGE_CODE, "cn");
                         } else if (arrSelectionModel.get(i).getTitle().equals("Japanese")) {
                             LocaleHelper.setLocale(mActivity, "jp");
-//                        } else if (arrSelectionModel.get(i).getTitle().equals("")) {
-
+                            Utils.saveToPreference(mActivity, Const.LANGUAGE_CODE, "jp");
+                        } else if (arrSelectionModel.get(i).getTitle().equals("Persian")) {
+                            LocaleHelper.setLocale(mActivity, "ar");
+                            Utils.saveToPreference(mActivity, Const.LANGUAGE_CODE, "ar");
                         }
+                        startActivity(new Intent(mActivity, MainActivity.class));
+                        finish();
                         break;
                     }
                 }
@@ -447,6 +529,9 @@ public class MainActivity extends AppCompatActivity {
 
         TextView textView = (TextView)view.findViewById(R.id.tv_dlg_title);
         textView.setText(getResources().getString(R.string.Impact));
+
+        TextView tvDescription = (TextView)view.findViewById(R.id.tv_dlg_descrption);
+        tvDescription.setText(getResources().getString(R.string.symbol_select_discription));
 
         Button btnSet = (Button)view.findViewById(R.id.btn_dlg_set);
         btnSet.setOnClickListener(new View.OnClickListener() {
@@ -519,6 +604,9 @@ public class MainActivity extends AppCompatActivity {
 
         TextView textView = (TextView)view.findViewById(R.id.tv_dlg_title);
         textView.setText(getResources().getString(R.string.Impact));
+
+        TextView tvDescription = (TextView)view.findViewById(R.id.tv_dlg_descrption);
+        tvDescription.setText(getResources().getString(R.string.impact_select_discription));
 
         Button btnSet = (Button)view.findViewById(R.id.btn_dlg_set);
         btnSet.setOnClickListener(new View.OnClickListener() {
@@ -640,7 +728,6 @@ public class MainActivity extends AppCompatActivity {
             return view;
         }
     }
-
     class MultiChoiceAdapter extends BaseAdapter {
 
         List<SelectionModel> arrayList;
@@ -699,6 +786,199 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+
+
+    private void signin() {
+        Utils.showProgress(mActivity);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(Const.DEVICE_TYPE, Const.ANDROID);
+        params.put(Const.DEVICE_TOKEN, Utils.getFromPreference(mActivity, Const.DEVICE_TOKEN));
+        params.put(Const.DEVICE_ID, Utils.getFromPreference(mActivity, Const.DEVICE_ID));
+
+        CustomRequest signinRequest = new CustomRequest(Request.Method.POST, API.SIGN_IN, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Utils.hideProgress();
+                        try {
+                            String status = response.getString("status");
+                            if (status.equals("200")) {
+                                JSONObject jsonObject = response.getJSONObject("data");
+
+                                String user_id = jsonObject.getString("user_id");
+
+
+                            } else  if (status.equals("401")) {
+//                                Utils.showOKDialog(mActivity, getResources().getString(R.string.email_unregistered));
+                            } else if (status.equals("402")) {
+//                                Utils.showOKDialog(mActivity, getResources().getString(R.string.incorrect_password));
+                            }
+                        }catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Utils.hideProgress();
+                        Toast.makeText(mActivity, error.toString(), Toast.LENGTH_LONG).show();
+                    }
+                });
+        RequestQueue requestQueue = Volley.newRequestQueue(mActivity);
+        requestQueue.add(signinRequest);
+
+    }
+
+
+
+
+
+
+
+    public void showFeedbackDlg() {
+        View view = getLayoutInflater().inflate(R.layout.feedback_dialog, null);
+
+        final EditText etName = (EditText)view.findViewById(R.id.et_name);
+        final EditText etEmail = (EditText)view.findViewById(R.id.et_email);
+        final EditText etFeedback = (EditText)view.findViewById(R.id.et_feedback);
+
+
+        Button btnSend = (Button)view.findViewById(R.id.btn_dlg_send);
+
+        Button btnCancel = (Button)view.findViewById(R.id.btn_dlg_cancel);
+
+
+        // Spinner element
+        final Spinner spinner = (Spinner) view.findViewById(R.id.sp_type);
+        // Spinner click listener
+        spinner.setOnItemSelectedListener(this);
+        // Spinner Drop down elements
+        String[] types = getResources().getStringArray(R.array.type);
+        List<String> categories = Arrays.asList(types);
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter <String>(this, android.R.layout.simple_spinner_item, categories);
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // attaching data adapter to spinner
+        spinner.setAdapter(dataAdapter);
+
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String name = etName.getText().toString();
+                String feedback = etFeedback.getText().toString();
+                String email = etEmail.getText().toString();
+                String type = spinner.getSelectedItem().toString();
+                if (!Utils.isEmailValid(email)) {
+                    Utils.showToast(mActivity, getResources().getString(R.string.Invalid_Email));
+                    return;
+                }
+                if (name.length() > 0 && feedback.length() > 0 && email.length() > 0 && type.length() > 0) {
+//                    send_feedback(name, email, type, feedback);
+                } else {
+                    return;
+                }
+                dialog.dismiss();
+            }
+        });
+
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog = new AlertDialog.Builder(mActivity)
+                .setCancelable(false)
+                .setView(view)
+                .show();
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+    }
+    private void send_feedback(String name,String email,String type, String feedback) {
+        Utils.showProgress(mActivity);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(Const.USER_ID, Utils.getFromPreference(mActivity, Const.USER_ID));
+        params.put("display_name", name);
+        params.put("feedback", feedback);
+        params.put("email", email);
+        params.put("type", type);
+
+        CustomRequest signinRequest = new CustomRequest(Request.Method.POST, API.SEND_FEEDBACK, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Utils.hideProgress();
+                        try {
+                            String status = response.getString("status");
+                            if (status.equals("200")) {
+                                Utils.showToast(mActivity, getResources().getString(R.string.Feedback_sent_successfully));
+
+                            } else  if (status.equals("401")) {
+//                                Utils.showOKDialog(mActivity, getResources().getString(R.string.email_unregistered));
+                            } else if (status.equals("402")) {
+//                                Utils.showOKDialog(mActivity, getResources().getString(R.string.incorrect_password));
+                            }
+                        }catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Utils.hideProgress();
+                        Toast.makeText(mActivity, error.toString(), Toast.LENGTH_LONG).show();
+                    }
+                });
+        RequestQueue requestQueue = Volley.newRequestQueue(mActivity);
+        requestQueue.add(signinRequest);
+
+    }
+
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // On selecting a spinner item
+        String item = parent.getItemAtPosition(position).toString();
+        switch (position) {
+            case 0:
+
+                break;
+            case 1:
+
+                break;
+        }
+        // Showing selected spinner item
+//        Toast.makeText(parent.getContext(), "Selected: " + item, Toast.LENGTH_LONG).show();
+    }
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -720,4 +1000,127 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Attempts to connect to Tapjoy
+     */
+    private void connectToTapjoy() {
+        // OPTIONAL: For custom startup flags.
+        Hashtable<String, Object> connectFlags = new Hashtable<String, Object>();
+        connectFlags.put(TapjoyConnectFlag.ENABLE_LOGGING, "true");
+
+        // If you are not using Tapjoy Managed currency, you would set your own user ID here.
+        //	connectFlags.put(TapjoyConnectFlag.USER_ID, "A_UNIQUE_USER_ID");
+
+        // Connect with the Tapjoy server.  Call this when the application first starts.
+        // REPLACE THE SDK KEY WITH YOUR TAPJOY SDK Key.
+        String tapjoySDKKey = "u6SfEbh_TA-WMiGqgQ3W8QECyiQIURFEeKm0zbOggubusy-o5ZfXp33sTXaD";
+
+        Tapjoy.setGcmSender("34027022155");
+
+        // NOTE: This is the only step required if you're an advertiser.
+        Tapjoy.connect(this, tapjoySDKKey, connectFlags, new TJConnectListener() {
+            @Override
+            public void onConnectSuccess() {
+                MainActivity.this.onConnectSuccess();
+            }
+
+            @Override
+            public void onConnectFailure() {
+                MainActivity.this.onConnectFailure();
+            }
+        });
+    }
+
+    //session start
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Tapjoy.onActivityStart(this);
+    }
+
+    //session end
+    @Override
+    protected void onStop() {
+        Tapjoy.onActivityStop(this);
+        super.onStop();
+    }
+    // called when Tapjoy connect call succeed
+    @Override
+    public void onConnectSuccess() {
+        Log.d(TAG, "Tapjoy connect Succeeded");
+    }
+    // called when Tapjoy connect call failed
+    @Override
+    public void onConnectFailure() {
+        Log.d(TAG, "Tapjoy connect Failed");
+    }
+    private TJPlacement offerwallPlacement;
+    private void callShowOffers() {
+        // Construct TJPlacement to show Offers web view from where users can download the latest offers for virtual currency.
+        offerwallPlacement = new TJPlacement(this, "offerwall_unit", new TJPlacementListener() {
+            @Override
+            public void onRequestSuccess(TJPlacement placement) {
+//                showToast("onRequestSuccess for placement " + placement.getName());
+
+                if (!placement.isContentAvailable()) {
+//                    showToast("No Offerwall content available");
+                }
+            }
+
+            @Override
+            public void onRequestFailure(TJPlacement placement, TJError error) {
+                showToast( "Offerwall error: " + error.message);
+            }
+
+            @Override
+            public void onContentReady(TJPlacement placement) {
+                TapjoyLog.i(TAG, "onContentReady for placement " + placement.getName());
+
+//                showToast( "Offerwall request success");
+                placement.showContent();
+            }
+
+            @Override
+            public void onContentShow(TJPlacement placement) {
+                TapjoyLog.i(TAG, "onContentShow for placement " + placement.getName());
+            }
+
+            @Override
+            public void onContentDismiss(TJPlacement placement) {
+                TapjoyLog.i(TAG, "onContentDismiss for placement " + placement.getName());
+            }
+
+            @Override
+            public void onPurchaseRequest(TJPlacement placement, TJActionRequest request, String productId) {
+            }
+
+            @Override
+            public void onRewardRequest(TJPlacement placement, TJActionRequest request, String itemId, int quantity) {
+            }
+        });
+        offerwallPlacement.requestContent();
+    }
+    private void showToast(final String text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Utils.showToast(MainActivity.this, text);
+            }
+        });
+    }
+
+
+
+
 }

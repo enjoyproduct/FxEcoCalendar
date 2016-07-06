@@ -38,7 +38,6 @@ public class GcmIntentService extends IntentService {
     public void setNotificationData(Bundle data) {
         parseMessage(data);
         if (!message.equals("")) {
-
             sendNotification();
         }
     }
@@ -47,15 +46,6 @@ public class GcmIntentService extends IntentService {
     private void sendNotification() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        if (type.equals("activity") ||
-                type.equals("receive_invite") ||
-                type.equals("accept_friend") ||
-                type.equals("taged")) {
-//            intent.putExtra("page_num", 6);
-            intent.putExtra("type", "activity");
-        } else if (type.equals("white")) {
-            intent.putExtra("type", "message");
-        }
 
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -78,17 +68,10 @@ public class GcmIntentService extends IntentService {
 
     String id, type, message, conversation_id, receiver_id;
     private String parseMessage(Bundle data){
-        id = "";
-        type = "";
         message = "";
-        conversation_id = "";
-        receiver_id = "";
-        if(data.containsKey("liked_post")){
-            message = data.getString("liked_post");
-            String[] str = message.split("_like_post_");
-            message = str[0];
-            receiver_id = str[1];
-            type = "activity";
+        if(data.containsKey("message")){
+            message = "Forex and Economic calendar\n" + data.getString("message");
+
         }
         return message;
     }

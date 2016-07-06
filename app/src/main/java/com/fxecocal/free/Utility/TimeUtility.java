@@ -12,7 +12,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by Administrator on 1/4/2016.
+ * Created by Administrator on menu1/menu4/2016.
  */
 public class TimeUtility {
     ///////////////convert date
@@ -71,7 +71,7 @@ public class TimeUtility {
         }
 
 //		TimeZone tz = TimeZone.getTimeZone("America/Chicago");
-        TimeZone timeZone = TimeZone.getTimeZone("GMT-4:00");
+        TimeZone timeZone = TimeZone.getTimeZone("GMT-menu4:00");
         SimpleDateFormat destFormat = new SimpleDateFormat("MMM dd, yyyy");
         destFormat.setTimeZone(timeZone);
 
@@ -188,18 +188,38 @@ public class TimeUtility {
             }else{
                 result = (int)(second /  (3600 * 24));
                 if(result < 7){
-                    str = String.valueOf(result) + "day";
+                    str = String.valueOf(result);
+                    if (result == 1) {
+                        str = str  + " Day";
+                    } else {
+                        str = str  + " Days";
+                    }
                 }else{
                     result = (int)(second / (3600 * 24 * 7));
                     if(result < 4){
-                        str = String.valueOf(result) + "week";
+                        str = String.valueOf(result);
+                        if (result == 1) {
+                            str = str  + " Week";
+                        } else {
+                            str = str  + " Weeks";
+                        }
                     }else {
                         result = (int)(second / (3600 * 24 * 30));
                         if(result < 12){
-                            str = String.valueOf(result) + "month";
+                            str = String.valueOf(result);
+                            if (result == 1) {
+                                str = str  + " Month";
+                            } else {
+                                str = str  + " Months";
+                            }
                         }else {
                             result = (int)(second / (3600 * 24 * 365));
-                            str = String.valueOf(result) + "year";
+                            str = String.valueOf(result);
+                            if (result == 1) {
+                                str = str  + " Year";
+                            } else {
+                                str = str  + " Years";
+                            }
                         }
                     }
                 }

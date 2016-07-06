@@ -25,8 +25,11 @@ import com.fxecocal.free.R;
 import com.fxecocal.free.Utility.TimeUtility;
 import com.fxecocal.free.Utility.Utils;
 import com.fxecocal.free.controller.MainActivity;
+import com.fxecocal.free.model.Const;
 import com.fxecocal.free.model.FactModel;
 import com.fxecocal.free.widget.SelectDateFragment;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -34,6 +37,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -111,13 +115,14 @@ public class MainCalendarFragment extends Fragment implements View.OnClickListen
     public static void loadData() {
         arrBuffer = new ArrayList<>();
         arrFacts = new ArrayList<>();
+        ///convert time
         if (((MainActivity)mActivity).localTime) {
             DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy");
             try {
                 Date date = (Date)formatter.parse(btnDate.getText().toString());
                 long timestamp = date.getTime() / 1000;
                 int offset = TimeUtility.getOffset();
-                timestamp = timestamp - (offset + 4) * 3600;
+                timestamp = timestamp - (offset + 5) * 3600;
                 if (currentTabNumber != 2) {
                     strDate = TimeUtility.getDateStringFromTimeStampSecond(timestamp, "MMMdd.yyyy");
                     strDate = strDate.substring(0,1).toLowerCase() + strDate.substring(1);
@@ -125,9 +130,13 @@ public class MainCalendarFragment extends Fragment implements View.OnClickListen
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-        } else {
+            if (((MainActivity)mActivity).localTime) {
 
+            } else {
+
+            }
         }
+
         new Description().execute();
     }
     private void chooseDate(int num) {
@@ -140,7 +149,7 @@ public class MainCalendarFragment extends Fragment implements View.OnClickListen
                 break;
             case 2:
                 strDate = "this";
-                btnDate.setText("This week");
+                btnDate.setText(getResources().getString(R.string.This_Week));
                 break;
             case 3:
                 break;
@@ -297,7 +306,7 @@ public class MainCalendarFragment extends Fragment implements View.OnClickListen
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             View view = convertView;
             if (view == null) {
                 view = mActivity.getLayoutInflater().inflate(R.layout.item_fact, null);
@@ -318,30 +327,81 @@ public class MainCalendarFragment extends Fragment implements View.OnClickListen
             TextView tvPrevious     = (TextView)view.findViewById(R.id.tv_if_previous);
             ImageView ivAlarm       = (ImageView)view.findViewById(R.id.iv_if_alarm);
             ImageView ivFlag        = (ImageView)view.findViewById(R.id.iv_if_flag);
+            ImageView ivCheck       = (ImageView)view.findViewById(R.id.iv_green_check);
             RelativeLayout rlImpact = (RelativeLayout)view.findViewById(R.id.rl_if_impact);
 
-            FactModel factModel = arrBuffer.get(position);
+            final FactModel factModel = arrBuffer.get(position);
 
-            tvDate.setText(factModel.getDate());
 //            tvTime.setText(factModel.getTime());
             if (factModel.getRemaining_timestamp() < 0) {
+                if (factModel.getDate().equals("All Day") || factModel.getDate().equals("Tentative")) {
+                    tvDate.setText(factModel.getDate());
+                    ivCheck.setVisibility(View.INVISIBLE);
+                } else {
+                    tvDate.setText("");
+                    ivCheck.setVisibility(View.VISIBLE);
+                }
+
                 tvTime.setText("");
                 ivAlarm.setVisibility(View.INVISIBLE);
+
             } else {
                 tvTime.setText(TimeUtility.countTime(factModel.getRemaining_timestamp()));
+                if (TimeUtility.countTime(factModel.getRemaining_timestamp()).contains(":")) {
+                    tvDate.setText("");
+                } else {
+                    tvDate.setText(factModel.getDate());
+                }
+                ivAlarm.setVisibility(View.VISIBLE);
+                ivCheck.setVisibility(View.GONE);
+                if (factModel.isEnabledAlarm()) {
+                    ivAlarm.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.alarm_on));
+                } else {
+                    ivAlarm.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.alarm_off));
+                }
             }
+            ivAlarm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ArrayList<FactModel> arrAlarms = getAlarms();
+                    if (factModel.isEnabledAlarm()) {
+
+                        for (FactModel fact : arrAlarms) {
+                            if (fact.getDescription().equals(factModel.getDescription())
+                                    && fact.getReleaseTime() == factModel.getReleaseTime()
+                                    && fact.isEnabledAlarm()) {
+                                arrAlarms.remove(fact);
+                                arrBuffer.get(position).setEnabledAlarm(false);
+                                Utils.showToast(mActivity, mActivity.getResources().getString(R.string.Desabled_alarm));
+                                break;
+                            }
+                        }
+                    } else {
+                        arrAlarms.add(factModel);
+                        arrBuffer.get(position).setEnabledAlarm(true);
+                        Utils.showToast(mActivity, mActivity.getResources().getString(R.string.Enabled_alarm));
+
+                    }
+                    saveAlarms(arrAlarms);
+                    notifyDataSetChanged();
+                }
+            });
 
             tvDescription.setText(factModel.getDescription());
             tvCurrency.setText(factModel.getCurrency());
-            tvImpact.setText(factModel.getImpact());
-            if (factModel.getImpact().equals("high")) {
+
+            if (factModel.getImpact().equals("High")) {
                 rlImpact.setBackgroundDrawable(mActivity.getResources().getDrawable(R.drawable.bg_red));
-            } else if (factModel.getImpact().equals("medium")) {
+                tvImpact.setText(mActivity.getResources().getString(R.string.Low));
+            } else if (factModel.getImpact().equals("Medium")) {
                 rlImpact.setBackgroundDrawable(mActivity.getResources().getDrawable(R.drawable.bg_orange));
-            } else if (factModel.getImpact().equals("low")) {
+                tvImpact.setText(mActivity.getResources().getString(R.string.Medium));
+            } else if (factModel.getImpact().equals("Low")) {
                 rlImpact.setBackgroundDrawable(mActivity.getResources().getDrawable(R.drawable.bg_yellow));
+                tvImpact.setText(mActivity.getResources().getString(R.string.High));
             } else {
                 rlImpact.setBackgroundDrawable(mActivity.getResources().getDrawable(R.drawable.bg_grey));
+                tvImpact.setText("");
             }
 
             tvActual.setText(factModel.getActual());
@@ -361,9 +421,7 @@ public class MainCalendarFragment extends Fragment implements View.OnClickListen
                 ivFlag.setBackgroundDrawable(mActivity.getResources().getDrawable(flagId));
             }
 
-            if (factModel.getTime().equals("All Day") || factModel.getTime().length() == 0) {
-                ivAlarm.setVisibility(View.INVISIBLE);
-            }
+
             return view;
         }
     }
@@ -456,11 +514,13 @@ public class MainCalendarFragment extends Fragment implements View.OnClickListen
                                 for (Element span : spans) {
                                     className = span.attr("class");
                                     if (className.contains("low")) {
-                                        impact = "low";
+                                        impact = "Low";
                                     } else if (className.contains("medium")) {
-                                        impact = "medium";
+                                        impact = "Medium";
                                     } else if (className.contains("high")) {
-                                        impact = "high";
+                                        impact = "High";
+                                    } else {
+                                        impact = "Non-E";
                                     }
                                 }
                             }else if (className.contains("calendar__event")) {
@@ -499,9 +559,9 @@ public class MainCalendarFragment extends Fragment implements View.OnClickListen
         @Override
         protected void onPostExecute(Void result) {
             // Set description into TextView
-            if (arrFacts.size() > 0) {
-                arrFacts.remove(arrFacts.size() - 1);
-            }
+//            if (arrFacts.size() > 0) {
+//                arrFacts.remove(arrFacts.size() - 1);
+//            }
 
 
 //            arrBuffer = (ArrayList) arrFacts.clone();
@@ -515,10 +575,14 @@ public class MainCalendarFragment extends Fragment implements View.OnClickListen
     }
     private static void filter(){
         arrBuffer = new ArrayList<>();
+        ArrayList<FactModel> alarmModels = getAlarms();
         for (FactModel factModel : arrFacts) {
             String strDate = factModel.getDate();
             String strTime = factModel.getTime();
-            if (!strTime.equals("All Day") &&  strDate.length() > 0) {
+            if (strTime.equals("All Day") || strTime.equals("Tentative")) {
+                factModel.setDate(strTime);
+                factModel.setRemaining_timestamp(-1);
+            } else if (strDate.length() > 0) {
                 DateFormat formatter = null;
                 Date date = null;
                 String time = "";
@@ -540,23 +604,44 @@ public class MainCalendarFragment extends Fragment implements View.OnClickListen
                     factModel.setRemaining_timestamp(-1);
                 } else {
                     long timestamp = date.getTime() / 1000;
-                    int offset = TimeUtility.getOffset();
-                    if (((MainActivity)mActivity).localTime) {
-                        timestamp = timestamp + (offset + 4) * 3600;
+                    //set ff's release time by timestamp
+                    factModel.setReleaseTime(timestamp);
+                    //check alarm status
+                    boolean enabledAlarm = false;
+                    for (int i = 0; i < alarmModels.size(); i ++ ) {
+                        FactModel alarm = (FactModel)alarmModels.get(i);
+                        if (timestamp == alarm.getReleaseTime()) {
+                            if (alarm.isEnabledAlarm()) {
+                                enabledAlarm = true;
+                            }
+                        }
                     }
+                    factModel.setEnabledAlarm(enabledAlarm);
+                    ///convert timezone
+                    int offset = TimeUtility.getOffset();
                     long remainingTimestamp = timestamp - TimeUtility.getCurrentTimeStamp();
+                    if (((MainActivity)mActivity).localTime) {
+                        timestamp = timestamp + (offset + 5) * 3600;
+
+                    } else {
+//                        timestamp = timestamp +  5 * 3600;
+//                        remainingTimestamp = timestamp - TimeUtility.getCurrentTimeStamp();
+                    }
+
                     strDate = TimeUtility.getDateStringFromTimeStampSecond(timestamp, "EEE MMM dd");
                     strTime = TimeUtility.getDateStringFromTimeStampSecond(timestamp, "hh:mma");
                     factModel.setDate(strDate);
                     factModel.setTime(strTime);
+
                     factModel.setRemaining_timestamp(remainingTimestamp);
+
                 }
 
             } else {
                 factModel.setRemaining_timestamp(-1);
             }
 
-            if (((MainActivity)mActivity).symbols.contains(factModel.getCurrency())) {
+            if (((MainActivity) mActivity).symbols.contains(factModel.getCurrency())) {
                 if (factModel.getImpact().length() == 0 && ((MainActivity)mActivity).impacts.contains("No Impact")) {
                     arrBuffer.add(factModel);
 
@@ -566,5 +651,26 @@ public class MainCalendarFragment extends Fragment implements View.OnClickListen
                 }
             }
         }
+    }
+    private static void saveAlarms(ArrayList<FactModel> arrayList) {
+        Gson gson  = new Gson();
+        String strGson = gson.toJson(arrayList);
+        Utils.saveToPreference(mActivity, Const.ALARMS, strGson);
+    }
+    private static ArrayList<FactModel> getAlarms() {
+        Gson gson = new Gson();
+        String strGson = Utils.getFromPreference(mActivity, Const.ALARMS);
+//        ArrayList<FactModel> alarmModels = gson.fromJson(strGson, ArrayList.class);
+        ArrayList<FactModel> alarmModels = mapFromJsonArray(strGson, FactModel.class);
+        if (alarmModels == null) {
+            return new ArrayList<FactModel>();
+        }
+
+        return alarmModels;
+    }
+    public static <T> ArrayList<T> mapFromJsonArray(String respInArray, Class<T> elementClass) {
+        Type listType = new TypeToken<ArrayList<FactModel>>(){}.getType();
+
+        return new Gson().fromJson(respInArray, listType);
     }
 }

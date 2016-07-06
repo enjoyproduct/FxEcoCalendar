@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="Today">امروز</string>
+    <string name="Tomorrow">فردا</string>
+    <string name="This_Week">این هفته</string>
+    <string name="By_Date">بر اساس تاریخ</string>
+    <string name="Setting">تنظیمات</string>
+    <string name="Invite_Friends">دعوت از دوستان</string>
+    <string name="Send_Feedback">ارسال بازخورد</string>
+    <string name="Rate_Us">به ما امتیاز دهید</string>
+    <string name="More">بیشتر</string>
+    <string name="Notificatoin">اطلاع رسانی</string>
+    <string name="Symbols">نمادها</string>
+    <string name="Impact">تاثیر</string>
+    <string name="Local_Time">زمان محلی</string>
+    <string name="Ad_Show">نمایش تبلیغات</string>
+    <string name="Language">زبان</string>
+    <string name="Cancel">انصراف</string>
+    <string name="Set">ثبت</string>
+    <string name="My_Fx">My Fx</string>
+    <string name="OK">تائید</string>
+    <string name="Turn_on_ads">توجیه نمایش تبلیغات</string>
+    <string name="Feedback">بازخورد</string>
+    <string name="Send">ارسال</string>
+    <string name="Input_name">نا شما</string>
+    <string name="Input_feedback">پیام شما</string>
+    <string name="Email">ایمیل</string>
+    <string name="Type">نوع بازخورد</string>
+
+    <string name="ads_show_description">توضیحات صفحه نمایش تبلیغات</string>
+    <string name="loading_description">توضیحات صفحه بارگذاری</string>
+    <string name="notification_select_description">توضیحات صفحه انتخاب زمان هشدار</string>
+    <string name="alarm_select_discription">توضیحات انتخاب هشدار</string>
+    <string name="symbol_select_discription">تویضحات صفحه نمادها</string>
+    <string name="feedback_discription">توضیحات صفحه بازخورد</string>
+
+    <string name="Invalid_Email">Invalid email</string>
+
+    <string name="Low">کم</string>
+    <string name="Medium">متوسط</string>
+    <string name="High">زیاد</string>
+
+    <string name="Feedback_sent_successfully">پیام شما با موفقیت ارسال شد</string>
+
+    <string name="English">انگلیسی</string>
+    <string name="Chinese">چینی</string>
+    <string name="Japanese">ژاپنی</string>
+    <string name="Spanish">اسپانیایی</string>
+
+
+    <string-array name="impacts">
+        <item>غیر اقتصادی</item>
+        <item>کم</item>
+        <item>متوسط</item>
+        <item>زیاد</item>
+
+    </string-array>
+
+    <string-array name="type">
+        <item>Bug report</item>
+        <item>Ask and question</item>
+        <item>Idea</item>
+    </string-array>
+
+</resources>

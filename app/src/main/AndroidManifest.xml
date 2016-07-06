@@ -19,6 +19,9 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -50,12 +53,18 @@
 
         <service android:name=".controller.push.GcmIntentService" />
 
+
+
+
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_android_key" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+
+
 
         <activity
             android:name=".controller.ExceptionViewActivity"
@@ -73,16 +82,39 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
             android:hardwareAccelerated="true" />
         <activity
-            android:name="com.tapjoy.mraid.view.ActionHandler"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity
-            android:name="com.tapjoy.mraid.view.Browser"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
-
-        <activity
             android:name="com.tapjoy.TJContentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <activity
+            android:name="com.tapjoy.mraid.view.ActionHandler"
+             android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name="com.tapjoy.mraid.view.Browser"
+              android:configChanges="orientation|keyboardHidden|screenSize" />
+        <receiver
+            android:name="com.tapjoy.InstallReferrerReceiver"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.tapjoy.GCMReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.gcm.intent.RETRY" />
+
+                <category android:name="com.tapjoy.easyapp" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name="com.tapjoy.TapjoyReceiver" />
+
+        <!--<meta-data android:name="com.tapjoy.notification.icon.large" android:resource="@drawable/ic_large"/>-->
+        <!--<meta-data android:name="com.tapjoy.notification.icon" android:resource="@drawable/ic_notify"/>-->
+        <!--<meta-data android:name="com.tapjoy.notification.icon.compat" android:resource="@drawable/icon"/>-->
 
     </application>
 

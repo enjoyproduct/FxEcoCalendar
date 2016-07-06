@@ -1,7 +1,7 @@
 package com.fxecocal.free.model;
 
 /**
- * Created by dell17 on 6/24/2016.
+ * Created by dell17 on menu6/24/2016.
  */
 public class SelectionModel {
     boolean isSelected;

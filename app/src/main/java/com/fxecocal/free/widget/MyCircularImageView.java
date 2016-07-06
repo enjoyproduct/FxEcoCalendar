@@ -21,7 +21,7 @@ import com.fxecocal.free.R;
 
 
 /**
- * Created by Administrator on 3/20/2016.
+ * Created by Administrator on menu3/20/2016.
  */
 public class MyCircularImageView extends ImageView{
     private static final ScaleType SCALE_TYPE = ScaleType.CENTER_CROP;

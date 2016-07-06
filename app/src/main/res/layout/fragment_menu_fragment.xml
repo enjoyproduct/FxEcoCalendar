@@ -15,6 +15,7 @@
             android:orientation="vertical"
             >
             <ImageView
+                android:id="@+id/iv_menu_banner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scaleType="centerCrop"
@@ -27,17 +28,6 @@
                 android:padding="@dimen/dimen_4dp"
                 android:background="@color/background_gray1"
                 android:weightSum="5">
-                <!--<LinearLayout-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_weight="4">-->
-                    <!--<ImageView-->
-                        <!--android:layout_width="32dp"-->
-                        <!--android:layout_height="32dp"-->
-                        <!--android:src="@drawable/settings"-->
-                        <!--/>-->
-                <!--</LinearLayout>-->
-
 
                 <TextView
                     android:layout_width="match_parent"
@@ -198,7 +188,7 @@
                 <!--<LinearLayout-->
                     <!--android:layout_width="match_parent"-->
                     <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_weight="4">-->
+                    <!--android:layout_weight="menu4">-->
                     <!--<ImageView-->
                         <!--android:layout_width="32dp"-->
                         <!--android:layout_height="32dp"-->
@@ -426,7 +416,58 @@
 
                     </RelativeLayout>
                 </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="@color/grey"
+                    android:layout_marginLeft="@dimen/dimen_12dp"/>
+                <!--ads dialog-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/dimen_8dp"
+                    android:weightSum="5">
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4"
+                        android:gravity="center_horizontal"
+                        >
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/language"
+                            />
+                    </LinearLayout>
+
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/Ad_Show"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/txt_22sp"
+                            android:layout_centerVertical="true"
+                            />
+
+                        <Switch
+                            android:id="@+id/sw_ads"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentRight="true"
+                            android:track="@drawable/switch_track_selector"
+                            android:thumb="@drawable/switch_thumb_selector"/>
+
+                    </RelativeLayout>
+                </LinearLayout>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="0.5dp"

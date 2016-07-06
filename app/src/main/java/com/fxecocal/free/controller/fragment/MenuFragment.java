@@ -19,6 +19,8 @@ import com.fxecocal.free.Utility.Utils;
 import com.fxecocal.free.controller.MainActivity;
 import com.fxecocal.free.model.Const;
 
+import java.util.Random;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -28,7 +30,7 @@ public class MenuFragment extends Fragment implements View.OnClickListener{
 
     private LinearLayout llInviteFriend, llSendFeedback, llRateUs, llMore;
     private RelativeLayout rlNotification, rlSymbol, rlImpact, rlLanguage;
-    private Switch swLocalTime;
+    private Switch swLocalTime,swAds;
     private TextView tvLanguage;
     private ImageView ivLanguage;
 
@@ -63,6 +65,7 @@ public class MenuFragment extends Fragment implements View.OnClickListener{
         rlLanguage      = (RelativeLayout)view.findViewById(R.id.rl_menu_language);
 
         swLocalTime = (Switch)view.findViewById(R.id.sw_menu);
+        swAds = (Switch)view.findViewById(R.id.sw_ads);
 
         tvLanguage = (TextView)view.findViewById(R.id.tv_menu_language);
         ivLanguage = (ImageView)view.findViewById(R.id.iv_menu_language);
@@ -82,6 +85,7 @@ public class MenuFragment extends Fragment implements View.OnClickListener{
             swLocalTime.setChecked(false);
         }
 
+
         swLocalTime.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -95,7 +99,27 @@ public class MenuFragment extends Fragment implements View.OnClickListener{
                 MainCalendarFragment.loadData();
             }
         });
+        if (Utils.getBooleanFromPreference(mActivity, Const.SHOW_ADS)) {
+            swAds.setChecked(true);
+        } else {
+            swAds.setChecked(false);
+        }
+        swAds.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    Utils.saveBooleanToPreference(mActivity, Const.SHOW_ADS, true);
+                } else {
+                    Utils.saveBooleanToPreference(mActivity, Const.SHOW_ADS, false);
+                }
+            }
+        });
 
+        Random r = new Random();
+        int rndInt = r.nextInt(6 - 1) + 1;
+        ImageView imageView = (ImageView)view.findViewById(R.id.iv_menu_banner);
+        int imageId = Utils.getImageIdentifier(mActivity, "menu" + rndInt);
+        imageView.setBackgroundDrawable(getResources().getDrawable(imageId));
 
         String language = ((MainActivity)mActivity).language;
         tvLanguage.setText(language);
@@ -106,6 +130,7 @@ public class MenuFragment extends Fragment implements View.OnClickListener{
         } else if (language.equals(getResources().getString(R.string.Japanese))) {
             ivLanguage.setBackgroundDrawable(getResources().getDrawable(R.drawable.jpy));
         }
+
     }
 
     @Override
